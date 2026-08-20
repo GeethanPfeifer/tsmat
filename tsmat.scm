@@ -8,7 +8,7 @@
 				(string-append
 					"cout << \"0 \" << "
 					(number->string arg2)
-					" << '\\n';\n"
+					" << '\\n' << flush;\n"
 					"cin >> a["
 					(number->string arg1)
 					"];\n"))
@@ -18,7 +18,7 @@
 					(number->string arg1)
 					"] << ' ' << "
 					(number->string arg2)
-					" << '\\n';\n"))
+					" << '\\n' << flush;\n"))
 			((eq? command 'ADD)
 				(string-append
 					"a["
@@ -63,3 +63,21 @@
 					"cout << \"2\\n\";\n"
 					"return 0;\n"))
 			(#t ""))))
+			
+(define pre-boilerplate
+	(string-append
+		"include <bits/stdc++.h>\n"
+		"using namespace std;\n"
+		"int main(){\n"
+		"int a[256] = {};\n"
+		"stack<int> s;\n"))
+		
+(define post-boilerplate "}\n")
+
+(define (description->c++ description)
+	(string-append
+		pre-boilerplate
+		(apply string-append
+			(map instruction->string (cdr description)))
+		post-boilerplate))
+
