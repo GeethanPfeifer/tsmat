@@ -11,7 +11,7 @@ a[241]%=256;
 a[242]+=3;
 a[242]%=256;
 source_read:
-cout << "0 " << -1 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[0];
 if(a[0])goto source_nonzero;
 if(a[240])goto source_done;
@@ -88,11 +88,11 @@ if(a[240])goto source_read;
 source_done:
 reverse_loop:
 cout << "1 " << a[242] << ' ' << 2 << '\n' << flush;
-cout << "0 " << 2 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[2];
 if(a[2])goto reverse_done;
 cout << "1 " << a[241] << ' ' << 2 << '\n' << flush;
-cout << "0 " << 2 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[3];
 cout << "1 " << a[240] << ' ' << 1 << '\n' << flush;
 cout << "1 " << a[3] << ' ' << 1 << '\n' << flush;
@@ -100,11 +100,11 @@ if(a[240])goto reverse_loop;
 reverse_done:
 exec_loop:
 cout << "1 " << a[242] << ' ' << 1 << '\n' << flush;
-cout << "0 " << 1 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[2];
 if(a[2])goto program_done;
 cout << "1 " << a[241] << ' ' << 1 << '\n' << flush;
-cout << "0 " << 1 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[10];
 s.push(a[10]);
 a[11]=s.top();
@@ -167,23 +167,19 @@ a[11]=s.top();
 s.pop();
 a[11]+=163;
 a[11]%=256;
-if(a[11])goto bad_opcode;
+if(a[11])goto malformed;
 if(a[240])goto op_close;
-bad_opcode:
-if(a[240])goto program_done;
 op_plus:
 a[20]+=1;
-a[20]%=256;
-if(a[240])goto advance;
-op_comma:
-cout << "0 " << -1 << '\n' << flush;
-cin >> a[20];
-a[20]+=0;
 a[20]%=256;
 if(a[240])goto advance;
 op_minus:
 a[20]+=255;
 a[20]%=256;
+if(a[240])goto advance;
+op_comma:
+cout << "0\n"<< flush;
+cin >> a[20];
 if(a[240])goto advance;
 op_dot:
 cout << "1 " << a[20] << ' ' << -1 << '\n' << flush;
@@ -192,11 +188,11 @@ op_left:
 cout << "1 " << a[240] << ' ' << 4 << '\n' << flush;
 cout << "1 " << a[20] << ' ' << 4 << '\n' << flush;
 cout << "1 " << a[242] << ' ' << 3 << '\n' << flush;
-cout << "0 " << 3 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[2];
 if(a[2])goto left_zero;
 cout << "1 " << a[241] << ' ' << 3 << '\n' << flush;
-cout << "0 " << 3 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[20];
 if(a[240])goto advance;
 left_zero:
@@ -208,11 +204,11 @@ op_right:
 cout << "1 " << a[240] << ' ' << 3 << '\n' << flush;
 cout << "1 " << a[20] << ' ' << 3 << '\n' << flush;
 cout << "1 " << a[242] << ' ' << 4 << '\n' << flush;
-cout << "0 " << 4 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[2];
 if(a[2])goto right_zero;
 cout << "1 " << a[241] << ' ' << 4 << '\n' << flush;
-cout << "0 " << 4 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[20];
 if(a[240])goto advance;
 right_zero:
@@ -238,11 +234,11 @@ cout << "1 " << a[10] << ' ' << 2 << '\n' << flush;
 if(a[240])goto exec_loop;
 forward_scan:
 cout << "1 " << a[242] << ' ' << 1 << '\n' << flush;
-cout << "0 " << 1 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[2];
 if(a[2])goto malformed;
 cout << "1 " << a[241] << ' ' << 1 << '\n' << flush;
-cout << "0 " << 1 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[12];
 cout << "1 " << a[240] << ' ' << 2 << '\n' << flush;
 cout << "1 " << a[12] << ' ' << 2 << '\n' << flush;
@@ -269,11 +265,11 @@ forward_match:
 if(a[240])goto exec_loop;
 backward_scan:
 cout << "1 " << a[242] << ' ' << 2 << '\n' << flush;
-cout << "0 " << 2 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[2];
 if(a[2])goto malformed;
 cout << "1 " << a[241] << ' ' << 2 << '\n' << flush;
-cout << "0 " << 2 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[12];
 cout << "1 " << a[240] << ' ' << 1 << '\n' << flush;
 cout << "1 " << a[12] << ' ' << 1 << '\n' << flush;

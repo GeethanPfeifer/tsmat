@@ -7,14 +7,12 @@
 (define (instruction->string instruction)
 	(let
 		((command (car instruction))
-			(arg1 (cadr instruction))
-			(arg2 (caddr instruction)))
+			(arg1 (if (> (length instruction) 1) (cadr instruction) #f))
+			(arg2 (if (> (length instruction) 2) (caddr instruction) #f)))
 		(cond
 			((eq? command 'READ)
 				(string-append
-					"cout << \"0 \" << "
-					(number->string arg2)
-					" << '\\n' << flush;\n"
+					"cout << \"0\\n\"<< flush;\n"
 					"cin >> a["
 					(number->string arg1)
 					"];\n"))
@@ -110,8 +108,8 @@
 			(display
 				(apply string-append
 					(cons
-						(number->string (length full-description))
-						(cons "\n"
+						"" ;;; (number->string (length full-description))
+						(cons "" ;;; "\n"
 							(map
 								(lambda (x) (string-append (number->string x) " "))
 								(map car full-description)))))

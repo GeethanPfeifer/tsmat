@@ -7,12 +7,12 @@ stack<int> s;
 a[255]+=1;
 a[255]%=256;
 loop:
-cout << "0 " << 0 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[0];
 a[0]+=255;
 a[0]%=256;
 if(a[0])goto not_push;
-cout << "0 " << 0 << '\n' << flush;
+cout << "0\n"<< flush;
 cin >> a[1];
 s.push(a[1]);
 if(a[255])goto loop;
