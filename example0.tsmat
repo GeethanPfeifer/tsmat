@@ -1,0 +1,19 @@
+(
+	;;; 1st stack machine
+	(0
+		(READ 12)		; reads (from another stack machine) to register 12
+		(SEND 12 1)		; sends the contents of register 12 to stack machine 1
+		(READIN 12)		; reads from stdin (via the controller) to register 1
+		(SENDOUT 12)	; sends the contents to stdout (via the controller)
+		(ADD 12 13)		; adds (the integer) 13 to register 12, modulo 256
+		(IF 12 LAB)		; if register 12 > 0, goto label LAB
+		(PUSH 12)		; pushes the contents of the register to the stack
+		(LABEL LAB)		; a label
+		(HALT))			; global halt. once this is reached, all stack machines are halted
+
+	;;; 2nd stack machine
+	(1
+		(SEND 0 0)
+		(ADD 1 1)
+		(LABEL LAB)
+		(IF 1 LAB)))
