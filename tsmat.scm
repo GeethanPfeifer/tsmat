@@ -1,3 +1,5 @@
+(import (chicken file))
+
 (define (instruction->string instruction)
 	(let
 		((command (car instruction))
@@ -81,3 +83,34 @@
 			(map instruction->string (cdr description)))
 		post-boilerplate))
 
+(define (create-program full-description name)
+	(if (directory-exists? name) (delete-directory name #t) #f)
+	(create-directory name)
+	(map
+		(lambda (description)
+			(call-with-output-file
+				(string-append
+					name
+					"/"
+					(number->string (car description))
+					".cpp")
+				(lambda (out)
+					(display (description->c++ description) out))))
+		full-description)
+	(call-with-output-file
+		(string-append
+			name
+			"/list.txt")
+		(lambda (out)
+			(display
+				(apply string-append
+					(cons
+						(number->string (length full-description))
+						(cons "\n"
+							(map
+								(lambda (x) (string-append (number->string x) " "))
+								(map car full-description)))))
+				out))))
+				
+	
+	
