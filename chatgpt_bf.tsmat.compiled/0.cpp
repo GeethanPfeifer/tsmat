@@ -182,8 +182,7 @@ cout << "2\n"<< flush;
 cin >> a[20];
 if(a[240])goto advance;
 op_dot:
-cout << "3\n"<< flush;
-cin >> a[20];
+cout << "3 " << a[20] << '\n' << flush;
 if(a[240])goto advance;
 op_left:
 cout << "1 " << a[240] << ' ' << 4 << '\n' << flush;

@@ -1,5 +1,8 @@
 #!/bin/chicken-csi -s
 
+#| Written by hand, only use of AI was for 
+figuring out how to use commandline arguments and file IO |#
+
 (import (chicken file))
 (import (chicken process))
 (import (chicken process-context))
@@ -31,10 +34,9 @@
 					"];\n"))
 			((eq? command 'SENDOUT)
 				(string-append
-					"cout << \"3\\n\"<< flush;\n"
-					"cin >> a["
+					"cout << \"3 \" << a["
 					(number->string arg1)
-					"];\n"))
+					"] << '\\n' << flush;\n"))
 			((eq? command 'ADD)
 				(string-append
 					"a["
