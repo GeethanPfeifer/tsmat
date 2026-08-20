@@ -5,9 +5,9 @@ SEND    REG     DEVICE
 ADD     REG     INT
 IF      REG     LABEL
 
-EMPTY   0       0
+EMPTY   LABEL   0
 PUSH    REG     0
-READ    REG     0
+POP     REG     0
 
 LABEL   NAME    0
 HALT    0       0
