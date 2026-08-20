@@ -72,7 +72,8 @@
 			
 (define pre-boilerplate
 	(string-append
-		"#include <bits/stdc++.h>\n"
+		"#include <iostream>\n"
+		"#include <stack>\n"
 		"using namespace std;\n"
 		"int main(){\n"
 		"int a[256] = {};\n"

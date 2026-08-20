@@ -1,0 +1,602 @@
+;;; https://chatgpt.com/share/6a86daf9-83d4-83ec-acaf-1aadba19ccfe
+
+(
+  (0
+    ;; Constants:
+    ;; a[240] = PUSH command and also constant true
+    ;; a[241] = POP command
+    ;; a[242] = EMPTY command
+    ;; a[250] remains constant zero
+    (ADD 240 1)
+    (ADD 241 2)
+    (ADD 242 3)
+
+    ;; ------------------------------------------------------------
+    ;; Read and filter Brainfuck source.
+    ;; Source is terminated by a NUL byte.
+    ;; Initially push instructions onto machine 2.
+    ;; ------------------------------------------------------------
+
+    (LABEL source_read 0)
+    (READ 0 -1)
+
+    ;; NUL?
+    (IF 0 source_nonzero)
+    (IF 240 source_done)
+
+    (LABEL source_nonzero 0)
+
+    ;; '+': 43
+    (PUSH 0 0)
+    (POP 1 0)
+    (ADD 1 213)
+    (IF 1 source_test_1)
+    (IF 240 source_keep)
+
+    ;; ',': 44
+    (LABEL source_test_1 0)
+    (PUSH 0 0)
+    (POP 1 0)
+    (ADD 1 212)
+    (IF 1 source_test_2)
+    (IF 240 source_keep)
+
+    ;; '-': 45
+    (LABEL source_test_2 0)
+    (PUSH 0 0)
+    (POP 1 0)
+    (ADD 1 211)
+    (IF 1 source_test_3)
+    (IF 240 source_keep)
+
+    ;; '.': 46
+    (LABEL source_test_3 0)
+    (PUSH 0 0)
+    (POP 1 0)
+    (ADD 1 210)
+    (IF 1 source_test_4)
+    (IF 240 source_keep)
+
+    ;; '<': 60
+    (LABEL source_test_4 0)
+    (PUSH 0 0)
+    (POP 1 0)
+    (ADD 1 196)
+    (IF 1 source_test_5)
+    (IF 240 source_keep)
+
+    ;; '>': 62
+    (LABEL source_test_5 0)
+    (PUSH 0 0)
+    (POP 1 0)
+    (ADD 1 194)
+    (IF 1 source_test_6)
+    (IF 240 source_keep)
+
+    ;; '[': 91
+    (LABEL source_test_6 0)
+    (PUSH 0 0)
+    (POP 1 0)
+    (ADD 1 165)
+    (IF 1 source_test_7)
+    (IF 240 source_keep)
+
+    ;; ']': 93
+    (LABEL source_test_7 0)
+    (PUSH 0 0)
+    (POP 1 0)
+    (ADD 1 163)
+    (IF 1 source_invalid)
+    (IF 240 source_keep)
+
+    ;; Ignore comments / whitespace / other source characters.
+    (LABEL source_invalid 0)
+    (IF 240 source_read)
+
+    ;; Push instruction on program-past stack.
+    (LABEL source_keep 0)
+    (SEND 240 2)
+    (SEND 0 2)
+    (IF 240 source_read)
+
+    ;; ------------------------------------------------------------
+    ;; Reverse loaded source from machine 2 onto machine 1.
+    ;;
+    ;; After this:
+    ;;    machine 1 top = first program instruction
+    ;;    machine 2     = empty
+    ;; ------------------------------------------------------------
+
+    (LABEL source_done 0)
+
+    (LABEL reverse_loop 0)
+    (SEND 242 2)
+    (READ 2 2)
+    (IF 2 reverse_done)
+
+    (SEND 241 2)
+    (READ 3 2)
+
+    (SEND 240 1)
+    (SEND 3 1)
+
+    (IF 240 reverse_loop)
+
+    ;; ------------------------------------------------------------
+    ;; Main interpreter
+    ;; ------------------------------------------------------------
+
+    (LABEL reverse_done 0)
+
+    (LABEL exec_loop 0)
+
+    ;; If future-program stack is empty, we're done.
+    (SEND 242 1)
+    (READ 2 1)
+    (IF 2 program_done)
+
+    ;; Pop current opcode.
+    (SEND 241 1)
+    (READ 10 1)
+
+    ;; '+'
+    (PUSH 10 0)
+    (POP 11 0)
+    (ADD 11 213)
+    (IF 11 op_test_1)
+    (IF 240 op_plus)
+
+    ;; ','
+    (LABEL op_test_1 0)
+    (PUSH 10 0)
+    (POP 11 0)
+    (ADD 11 212)
+    (IF 11 op_test_2)
+    (IF 240 op_comma)
+
+    ;; '-'
+    (LABEL op_test_2 0)
+    (PUSH 10 0)
+    (POP 11 0)
+    (ADD 11 211)
+    (IF 11 op_test_3)
+    (IF 240 op_minus)
+
+    ;; '.'
+    (LABEL op_test_3 0)
+    (PUSH 10 0)
+    (POP 11 0)
+    (ADD 11 210)
+    (IF 11 op_test_4)
+    (IF 240 op_dot)
+
+    ;; '<'
+    (LABEL op_test_4 0)
+    (PUSH 10 0)
+    (POP 11 0)
+    (ADD 11 196)
+    (IF 11 op_test_5)
+    (IF 240 op_left)
+
+    ;; '>'
+    (LABEL op_test_5 0)
+    (PUSH 10 0)
+    (POP 11 0)
+    (ADD 11 194)
+    (IF 11 op_test_6)
+    (IF 240 op_right)
+
+    ;; '['
+    (LABEL op_test_6 0)
+    (PUSH 10 0)
+    (POP 11 0)
+    (ADD 11 165)
+    (IF 11 op_test_7)
+    (IF 240 op_open)
+
+    ;; ']'
+    (LABEL op_test_7 0)
+    (PUSH 10 0)
+    (POP 11 0)
+    (ADD 11 163)
+    (IF 11 bad_opcode)
+    (IF 240 op_close)
+
+    (LABEL bad_opcode 0)
+    (IF 240 program_done)
+
+    ;; ------------------------------------------------------------
+    ;; +
+    ;; ------------------------------------------------------------
+
+    (LABEL op_plus 0)
+    (ADD 20 1)
+    (IF 240 advance)
+
+    ;; ------------------------------------------------------------
+    ;; ,
+    ;; ------------------------------------------------------------
+
+    (LABEL op_comma 0)
+    (READ 20 -1)
+    (ADD 20 0)
+    (IF 240 advance)
+
+    ;; ------------------------------------------------------------
+    ;; -
+    ;; ------------------------------------------------------------
+
+    (LABEL op_minus 0)
+    (ADD 20 255)
+    (IF 240 advance)
+
+    ;; ------------------------------------------------------------
+    ;; .
+    ;; ------------------------------------------------------------
+
+    (LABEL op_dot 0)
+    (SEND 20 -1)
+    (IF 240 advance)
+
+    ;; ------------------------------------------------------------
+    ;; <
+    ;;
+    ;; machine 3 = cells left of current cell
+    ;; machine 4 = cells right of current cell
+    ;; a[20]     = current cell
+    ;; ------------------------------------------------------------
+
+    (LABEL op_left 0)
+
+    ;; Current cell becomes first cell on right side.
+    (SEND 240 4)
+    (SEND 20 4)
+
+    ;; Is there an existing cell to our left?
+    (SEND 242 3)
+    (READ 2 3)
+    (IF 2 left_zero)
+
+    ;; yes: it becomes current
+    (SEND 241 3)
+    (READ 20 3)
+    (IF 240 advance)
+
+    ;; no: newly visited cells contain zero
+    (LABEL left_zero 0)
+    (PUSH 250 0)
+    (POP 20 0)
+    (IF 240 advance)
+
+    ;; ------------------------------------------------------------
+    ;; >
+    ;; ------------------------------------------------------------
+
+    (LABEL op_right 0)
+
+    ;; Current cell becomes first cell on left side.
+    (SEND 240 3)
+    (SEND 20 3)
+
+    ;; Is there an existing cell to our right?
+    (SEND 242 4)
+    (READ 2 4)
+    (IF 2 right_zero)
+
+    ;; yes
+    (SEND 241 4)
+    (READ 20 4)
+    (IF 240 advance)
+
+    ;; no
+    (LABEL right_zero 0)
+    (PUSH 250 0)
+    (POP 20 0)
+    (IF 240 advance)
+
+    ;; ------------------------------------------------------------
+    ;; [
+    ;;
+    ;; If current cell != 0, just advance.
+    ;; Otherwise move forward until the corresponding ].
+    ;; ------------------------------------------------------------
+
+    (LABEL op_open 0)
+    (IF 20 advance)
+
+    ;; '[' itself becomes part of program-past.
+    (SEND 240 2)
+    (SEND 10 2)
+    (IF 240 forward_scan)
+
+    ;; ------------------------------------------------------------
+    ;; ]
+    ;;
+    ;; If cell == 0, advance.
+    ;; Otherwise rewind to matching '['.
+    ;; ------------------------------------------------------------
+
+    (LABEL op_close 0)
+    (IF 20 close_nonzero)
+    (IF 240 advance)
+
+    (LABEL close_nonzero 0)
+
+    ;; Put the current ']' back into future-program.
+    (SEND 240 1)
+    (SEND 10 1)
+    (IF 240 backward_scan)
+
+    ;; ------------------------------------------------------------
+    ;; Normal instruction-pointer advance:
+    ;; transfer current opcode to program-past.
+    ;; ------------------------------------------------------------
+
+    (LABEL advance 0)
+    (SEND 240 2)
+    (SEND 10 2)
+    (IF 240 exec_loop)
+
+    ;; ------------------------------------------------------------
+    ;; Scan forward for matching ']'.
+    ;;
+    ;; The local stack of machine 0 is used as an unbounded nesting
+    ;; counter. One item = one nested '['.
+    ;; ------------------------------------------------------------
+
+    (LABEL forward_scan 0)
+
+    ;; End of program before match = malformed BF.
+    (SEND 242 1)
+    (READ 2 1)
+    (IF 2 malformed)
+
+    ;; Move next instruction future -> past.
+    (SEND 241 1)
+    (READ 12 1)
+
+    (SEND 240 2)
+    (SEND 12 2)
+
+    ;; Is it '['?
+    (PUSH 12 0)
+    (POP 13 0)
+    (ADD 13 165)
+    (IF 13 forward_test_close)
+
+    ;; nested '[': increment nesting depth
+    (PUSH 240 0)
+    (IF 240 forward_scan)
+
+    ;; Is it ']'?
+    (LABEL forward_test_close 0)
+    (PUSH 12 0)
+    (POP 13 0)
+    (ADD 13 163)
+    (IF 13 forward_scan)
+
+    ;; If nesting stack is empty, this is our matching ']'.
+    (EMPTY forward_match 0)
+
+    ;; Otherwise consume one nested level.
+    (POP 14 0)
+    (IF 240 forward_scan)
+
+    (LABEL forward_match 0)
+    (IF 240 exec_loop)
+
+    ;; ------------------------------------------------------------
+    ;; Scan backward for matching '['.
+    ;;
+    ;; Move instructions past -> future.
+    ;; A nested ']' adds a nesting marker.
+    ;; A nested '[' removes one.
+    ;; The first '[' encountered at depth zero is the target.
+    ;; ------------------------------------------------------------
+
+    (LABEL backward_scan 0)
+
+    (SEND 242 2)
+    (READ 2 2)
+    (IF 2 malformed)
+
+    ;; Move instruction past -> future.
+    (SEND 241 2)
+    (READ 12 2)
+
+    (SEND 240 1)
+    (SEND 12 1)
+
+    ;; Is it ']'?
+    (PUSH 12 0)
+    (POP 13 0)
+    (ADD 13 163)
+    (IF 13 backward_test_open)
+
+    ;; nested ']'
+    (PUSH 240 0)
+    (IF 240 backward_scan)
+
+    ;; Is it '['?
+    (LABEL backward_test_open 0)
+    (PUSH 12 0)
+    (POP 13 0)
+    (ADD 13 165)
+    (IF 13 backward_scan)
+
+    ;; At depth zero this is the matching '['.
+    (EMPTY backward_match 0)
+
+    ;; Otherwise close one nested pair.
+    (POP 14 0)
+    (IF 240 backward_scan)
+
+    (LABEL backward_match 0)
+    (IF 240 exec_loop)
+
+    ;; ------------------------------------------------------------
+    ;; Termination
+    ;; ------------------------------------------------------------
+
+    (LABEL malformed 0)
+    (HALT 0 0)
+
+    (LABEL program_done 0)
+    (HALT 0 0))
+
+
+  ;; ==============================================================
+  ;; MACHINE 1: program future
+  ;;
+  ;; Machines 1-4 are identical generic stack servers.
+  ;;
+  ;; Protocol from machine 0:
+  ;;   1, value    PUSH
+  ;;   2           POP, value returned
+  ;;   3           EMPTY, 0 or 1 returned
+  ;; ==============================================================
+
+  (1
+    (ADD 255 1)
+
+    (LABEL loop 0)
+    (READ 0 0)
+
+    ;; command == 1?
+    (ADD 0 255)
+    (IF 0 not_push)
+
+    (READ 1 0)
+    (PUSH 1 0)
+    (IF 255 loop)
+
+    ;; command == 2?
+    (LABEL not_push 0)
+    (ADD 0 255)
+    (IF 0 not_pop)
+
+    (POP 1 0)
+    (SEND 1 0)
+    (IF 255 loop)
+
+    ;; Otherwise command == 3: EMPTY
+    (LABEL not_pop 0)
+    (EMPTY is_empty 0)
+
+    ;; not empty
+    (SEND 254 0)
+    (IF 255 loop)
+
+    ;; empty
+    (LABEL is_empty 0)
+    (SEND 255 0)
+    (IF 255 loop))
+
+
+  ;; ==============================================================
+  ;; MACHINE 2: program past
+  ;; ==============================================================
+
+  (2
+    (ADD 255 1)
+
+    (LABEL loop 0)
+    (READ 0 0)
+
+    (ADD 0 255)
+    (IF 0 not_push)
+
+    (READ 1 0)
+    (PUSH 1 0)
+    (IF 255 loop)
+
+    (LABEL not_push 0)
+    (ADD 0 255)
+    (IF 0 not_pop)
+
+    (POP 1 0)
+    (SEND 1 0)
+    (IF 255 loop)
+
+    (LABEL not_pop 0)
+    (EMPTY is_empty 0)
+
+    (SEND 254 0)
+    (IF 255 loop)
+
+    (LABEL is_empty 0)
+    (SEND 255 0)
+    (IF 255 loop))
+
+
+  ;; ==============================================================
+  ;; MACHINE 3: tape left
+  ;; ==============================================================
+
+  (3
+    (ADD 255 1)
+
+    (LABEL loop 0)
+    (READ 0 0)
+
+    (ADD 0 255)
+    (IF 0 not_push)
+
+    (READ 1 0)
+    (PUSH 1 0)
+    (IF 255 loop)
+
+    (LABEL not_push 0)
+    (ADD 0 255)
+    (IF 0 not_pop)
+
+    (POP 1 0)
+    (SEND 1 0)
+    (IF 255 loop)
+
+    (LABEL not_pop 0)
+    (EMPTY is_empty 0)
+
+    (SEND 254 0)
+    (IF 255 loop)
+
+    (LABEL is_empty 0)
+    (SEND 255 0)
+    (IF 255 loop))
+
+
+  ;; ==============================================================
+  ;; MACHINE 4: tape right
+  ;; ==============================================================
+
+  (4
+    (ADD 255 1)
+
+    (LABEL loop 0)
+    (READ 0 0)
+
+    (ADD 0 255)
+    (IF 0 not_push)
+
+    (READ 1 0)
+    (PUSH 1 0)
+    (IF 255 loop)
+
+    (LABEL not_push 0)
+    (ADD 0 255)
+    (IF 0 not_pop)
+
+    (POP 1 0)
+    (SEND 1 0)
+    (IF 255 loop)
+
+    (LABEL not_pop 0)
+    (EMPTY is_empty 0)
+
+    (SEND 254 0)
+    (IF 255 loop)
+
+    (LABEL is_empty 0)
+    (SEND 255 0)
+    (IF 255 loop))
+)
