@@ -18,3 +18,28 @@ How it accomplishes stuff:
     - creates a bunch of threads
     - each thread runs an interpreter (or compiled? might be easier)
     - runs until all the threads have sent halt signals
+
+
+
+
+int             <-- reads a byte
+LIST OF INSTRUCTIONS
+
+
+END 0 0         <-- moves on to next
+
+
+
+
+
+
+
+
+
+// a device description
+
+1
+...
+END 0 0
+
+
