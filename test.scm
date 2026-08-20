@@ -51,7 +51,6 @@
 			(LABEL ABC 0)
 			(HALT 0 0))))
 
-(create-program very-basic-program "test1")
+(compile very-basic-program "test1")
 
-		
 		

@@ -1,4 +1,5 @@
 (import (chicken file))
+(import (chicken process))
 
 (define (instruction->string instruction)
 	(let
@@ -68,7 +69,7 @@
 			
 (define pre-boilerplate
 	(string-append
-		"include <bits/stdc++.h>\n"
+		"#include <bits/stdc++.h>\n"
 		"using namespace std;\n"
 		"int main(){\n"
 		"int a[256] = {};\n"
@@ -112,5 +113,22 @@
 								(map car full-description)))))
 				out))))
 				
+(define (call-g++ full-description name)
+	(map
+		(lambda (device)
+			(system
+				(string-append "g++ "
+					name
+					"/"
+					(number->string device)
+					".cpp -o "
+					name
+					"/"
+					(number->string device))))
+		(map car full-description)))
+		
+(define (compile full-description name)
+	(create-program full-description name)
+	(call-g++ full-description name))
 	
-	
+
