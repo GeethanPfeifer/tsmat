@@ -23,6 +23,18 @@
 					"] << ' ' << "
 					(number->string arg2)
 					" << '\\n' << flush;\n"))
+			((eq? command 'READIN)
+				(string-append
+					"cout << \"2\\n\"<< flush;\n"
+					"cin >> a["
+					(number->string arg1)
+					"];\n"))
+			((eq? command 'SENDOUT)
+				(string-append
+					"cout << \"3\\n\"<< flush;\n"
+					"cin >> a["
+					(number->string arg1)
+					"];\n"))
 			((eq? command 'ADD)
 				(string-append
 					"a["
@@ -64,7 +76,7 @@
 					":\n"))
 			((eq? command 'HALT)
 				(string-append
-					"cout << \"2\\n\";\n"
+					"cout << \"4\\n\";\n"
 					"return 0;\n"))
 			(#t ""))))
 			

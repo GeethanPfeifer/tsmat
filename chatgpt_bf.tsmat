@@ -1,36 +1,29 @@
 ;;; https://chatgpt.com/share/6a86daf9-83d4-83ec-acaf-1aadba19ccfe
-
+;;; Note: I decided to make the controller halt after a single signal, as opposed to multiple, so the last message in that chat is not relevant.
 (
   ;; ============================================================
   ;; MACHINE 0 — Brainfuck interpreter
+  ;;
+  ;; External input format:
+  ;;
+  ;;     <brainfuck program> NUL <brainfuck input>
+  ;;
+  ;; Non-BF characters in the program portion are ignored.
   ;; ============================================================
   (0
-    ;; Constants
-    ;;
-    ;; 240 = 1 = PUSH command / unconditional-branch true
-    ;; 241 = 2 = POP command
-    ;; 242 = 3 = EMPTY command
-    ;; 250 = permanently zero
-    (ADD 240 1)
-    (ADD 241 2)
-    (ADD 242 3)
+    ;; Stack-server commands.
+    (ADD 240 1)   ; PUSH / constant true
+    (ADD 241 2)   ; POP
+    (ADD 242 3)   ; EMPTY
 
-    ;; ----------------------------------------------------------
-    ;; Read Brainfuck source.
-    ;;
-    ;; Convention retained from before:
-    ;;
-    ;;     <brainfuck source> NUL <brainfuck input>
-    ;;
-    ;; Non-BF source characters are ignored.
-    ;;
-    ;; Source is initially pushed onto machine 2.
-    ;; ----------------------------------------------------------
+    ;; ==========================================================
+    ;; Load Brainfuck program
+    ;; ==========================================================
 
     (LABEL source_read)
-    (READ 0)
+    (READIN 0)
 
-    ;; NUL terminates the source.
+    ;; NUL ends the source program.
     (IF 0 source_nonzero)
     (IF 240 source_done)
 
@@ -40,105 +33,94 @@
     (PUSH 0)
     (POP 1)
     (ADD 1 213)
-    (IF 1 source_test_1)
+    (IF 1 source_test_comma)
     (IF 240 source_keep)
 
     ;; ',': 44
-    (LABEL source_test_1)
+    (LABEL source_test_comma)
     (PUSH 0)
     (POP 1)
     (ADD 1 212)
-    (IF 1 source_test_2)
+    (IF 1 source_test_minus)
     (IF 240 source_keep)
 
     ;; '-': 45
-    (LABEL source_test_2)
+    (LABEL source_test_minus)
     (PUSH 0)
     (POP 1)
     (ADD 1 211)
-    (IF 1 source_test_3)
+    (IF 1 source_test_dot)
     (IF 240 source_keep)
 
     ;; '.': 46
-    (LABEL source_test_3)
+    (LABEL source_test_dot)
     (PUSH 0)
     (POP 1)
     (ADD 1 210)
-    (IF 1 source_test_4)
+    (IF 1 source_test_left)
     (IF 240 source_keep)
 
     ;; '<': 60
-    (LABEL source_test_4)
+    (LABEL source_test_left)
     (PUSH 0)
     (POP 1)
     (ADD 1 196)
-    (IF 1 source_test_5)
+    (IF 1 source_test_right)
     (IF 240 source_keep)
 
     ;; '>': 62
-    (LABEL source_test_5)
+    (LABEL source_test_right)
     (PUSH 0)
     (POP 1)
     (ADD 1 194)
-    (IF 1 source_test_6)
+    (IF 1 source_test_open)
     (IF 240 source_keep)
 
     ;; '[': 91
-    (LABEL source_test_6)
+    (LABEL source_test_open)
     (PUSH 0)
     (POP 1)
     (ADD 1 165)
-    (IF 1 source_test_7)
+    (IF 1 source_test_close)
     (IF 240 source_keep)
 
     ;; ']': 93
-    (LABEL source_test_7)
+    (LABEL source_test_close)
     (PUSH 0)
     (POP 1)
     (ADD 1 163)
     (IF 1 source_invalid)
     (IF 240 source_keep)
 
-    ;; Ignore anything else.
+    ;; Everything other than the eight BF instructions is a comment.
     (LABEL source_invalid)
     (IF 240 source_read)
 
-    ;; Push BF instruction onto machine 2.
+    ;; Initially put the program onto stack machine 2.
     (LABEL source_keep)
     (SEND 240 2)
     (SEND 0 2)
     (IF 240 source_read)
 
 
-    ;; ----------------------------------------------------------
-    ;; Reverse program.
+    ;; ==========================================================
+    ;; Reverse source into machine 1.
     ;;
-    ;; During loading:
-    ;;
-    ;; machine 2:
-    ;;     bottom [ first ... last ] top
-    ;;
-    ;; We want machine 1:
-    ;;
-    ;;     bottom [ last ... first ] top
-    ;;
-    ;; so its top is the current instruction.
-    ;; ----------------------------------------------------------
+    ;; machine 1 becomes the "future" side of the program zipper,
+    ;; with the first instruction on top.
+    ;; ==========================================================
 
     (LABEL source_done)
 
     (LABEL reverse_loop)
 
-    ;; Is machine 2 empty?
     (SEND 242 2)
     (READ 2)
     (IF 2 reverse_done)
 
-    ;; Pop from machine 2.
     (SEND 241 2)
     (READ 3)
 
-    ;; Push onto machine 1.
     (SEND 240 1)
     (SEND 3 1)
 
@@ -146,25 +128,24 @@
 
 
     ;; ==========================================================
-    ;; Main interpreter
+    ;; Execution
     ;;
-    ;; Program zipper:
+    ;; Program:
     ;;
-    ;; machine 2 = instructions before IP
-    ;; machine 1 = instruction at/after IP
+    ;;   machine 2       machine 1
+    ;;     past      IP     future
     ;;
-    ;; Tape zipper:
+    ;; Tape:
     ;;
-    ;; machine 3 = cells left of DP
-    ;; a[20]     = current cell
-    ;; machine 4 = cells right of DP
+    ;;   machine 3       a[20]       machine 4
+    ;;     left         current        right
     ;; ==========================================================
 
     (LABEL reverse_done)
 
     (LABEL exec_loop)
 
-    ;; End of program?
+    ;; Program future empty => finished.
     (SEND 242 1)
     (READ 2)
     (IF 2 program_done)
@@ -174,67 +155,67 @@
     (READ 10)
 
 
-    ;; ----------------------------------------------------------
-    ;; Decode opcode
-    ;; ----------------------------------------------------------
+    ;; ==========================================================
+    ;; Decode
+    ;; ==========================================================
 
-    ;; '+'
+    ;; +
     (PUSH 10)
     (POP 11)
     (ADD 11 213)
-    (IF 11 op_test_1)
+    (IF 11 test_comma)
     (IF 240 op_plus)
 
-    ;; ','
-    (LABEL op_test_1)
+    ;; ,
+    (LABEL test_comma)
     (PUSH 10)
     (POP 11)
     (ADD 11 212)
-    (IF 11 op_test_2)
+    (IF 11 test_minus)
     (IF 240 op_comma)
 
-    ;; '-'
-    (LABEL op_test_2)
+    ;; -
+    (LABEL test_minus)
     (PUSH 10)
     (POP 11)
     (ADD 11 211)
-    (IF 11 op_test_3)
+    (IF 11 test_dot)
     (IF 240 op_minus)
 
-    ;; '.'
-    (LABEL op_test_3)
+    ;; .
+    (LABEL test_dot)
     (PUSH 10)
     (POP 11)
     (ADD 11 210)
-    (IF 11 op_test_4)
+    (IF 11 test_left)
     (IF 240 op_dot)
 
-    ;; '<'
-    (LABEL op_test_4)
+    ;; <
+    (LABEL test_left)
     (PUSH 10)
     (POP 11)
     (ADD 11 196)
-    (IF 11 op_test_5)
+    (IF 11 test_right)
     (IF 240 op_left)
 
-    ;; '>'
-    (LABEL op_test_5)
+    ;; >
+    (LABEL test_right)
     (PUSH 10)
     (POP 11)
     (ADD 11 194)
-    (IF 11 op_test_6)
+    (IF 11 test_open)
     (IF 240 op_right)
 
-    ;; '['
-    (LABEL op_test_6)
+    ;; [
+    (LABEL test_open)
     (PUSH 10)
     (POP 11)
     (ADD 11 165)
-    (IF 11 op_test_7)
+    (IF 11 test_close)
     (IF 240 op_open)
 
-    ;; ']'
-    (LABEL op_test_7)
+    ;; ]
+    (LABEL test_close)
     (PUSH 10)
     (POP 11)
     (ADD 11 163)
@@ -256,20 +237,19 @@
     ;; ==========================================================
 
     (LABEL op_minus)
-
-    ;; Byte arithmetic means +255 == -1 mod 256.
     (ADD 20 255)
     (IF 240 advance)
 
 
     ;; ==========================================================
     ;; ,
+    ;;
+    ;; Unlike inter-machine READ, this explicitly requests a byte
+    ;; from external stdin.
     ;; ==========================================================
 
     (LABEL op_comma)
-
-    ;; Controller supplies the next external byte as an integer.
-    (READ 20)
+    (READIN 20)
     (IF 240 advance)
 
 
@@ -278,10 +258,7 @@
     ;; ==========================================================
 
     (LABEL op_dot)
-
-    ;; -1 denotes external output under the same convention as
-    ;; the earlier version.
-    (SEND 20 -1)
+    (SENDOUT 20)
     (IF 240 advance)
 
 
@@ -291,22 +268,22 @@
 
     (LABEL op_left)
 
-    ;; Current cell moves onto right stack.
+    ;; Current cell moves onto right-hand stack.
     (SEND 240 4)
     (SEND 20 4)
 
-    ;; Anything to the left?
+    ;; Is there a known cell to our left?
     (SEND 242 3)
     (READ 2)
-    (IF 2 left_zero)
+    (IF 2 left_new_cell)
 
-    ;; Pop previous left cell.
+    ;; Yes: pop it and make it current.
     (SEND 241 3)
     (READ 20)
     (IF 240 advance)
 
-    ;; Unvisited cells contain zero.
-    (LABEL left_zero)
+    ;; No: Brainfuck tape cells start at zero.
+    (LABEL left_new_cell)
     (PUSH 250)
     (POP 20)
     (IF 240 advance)
@@ -318,21 +295,20 @@
 
     (LABEL op_right)
 
-    ;; Current cell moves onto left stack.
+    ;; Current cell moves onto left-hand stack.
     (SEND 240 3)
     (SEND 20 3)
 
-    ;; Anything to the right?
+    ;; Is there a known cell to our right?
     (SEND 242 4)
     (READ 2)
-    (IF 2 right_zero)
+    (IF 2 right_new_cell)
 
-    ;; Pop previous right cell.
     (SEND 241 4)
     (READ 20)
     (IF 240 advance)
 
-    (LABEL right_zero)
+    (LABEL right_new_cell)
     (PUSH 250)
     (POP 20)
     (IF 240 advance)
@@ -340,16 +316,16 @@
 
     ;; ==========================================================
     ;; [
+    ;;
+    ;; If the cell is nonzero, execute the body.
+    ;; Otherwise scan forward to its corresponding ].
     ;; ==========================================================
 
     (LABEL op_open)
 
-    ;; Nonzero: execute loop body normally.
     (IF 20 advance)
 
-    ;; Zero: skip to corresponding ']'.
-    ;;
-    ;; Current '[' belongs to program-past.
+    ;; The '[' itself is now behind the IP.
     (SEND 240 2)
     (SEND 10 2)
 
@@ -358,18 +334,19 @@
 
     ;; ==========================================================
     ;; ]
+    ;;
+    ;; If zero, leave the loop.
+    ;; If nonzero, scan backward to the corresponding '['.
     ;; ==========================================================
 
     (LABEL op_close)
 
-    ;; Zero: loop has finished.
     (IF 20 close_nonzero)
     (IF 240 advance)
 
-    ;; Nonzero: rewind to matching '['.
     (LABEL close_nonzero)
 
-    ;; Current ']' must remain in program-future while rewinding.
+    ;; Put the current ] back onto future while rewinding.
     (SEND 240 1)
     (SEND 10 1)
 
@@ -377,12 +354,12 @@
 
 
     ;; ==========================================================
-    ;; Normal IP advance
+    ;; Normal IP advancement
     ;; ==========================================================
 
     (LABEL advance)
 
-    ;; Current opcode becomes part of program-past.
+    ;; Current opcode moves from future to past.
     (SEND 240 2)
     (SEND 10 2)
 
@@ -390,47 +367,47 @@
 
 
     ;; ==========================================================
-    ;; Scan forward to matching ']'
+    ;; Forward bracket scan
     ;;
-    ;; Machine 0's own stack is an unbounded nesting counter.
-    ;; One stack item represents one nested '['.
+    ;; Machine 0's local stack is used as an unbounded nesting
+    ;; counter.
     ;; ==========================================================
 
     (LABEL forward_scan)
 
-    ;; No matching ].
+    ;; Future empty before finding ] => malformed program.
     (SEND 242 1)
     (READ 2)
     (IF 2 malformed)
 
-    ;; Move one instruction future -> past.
+    ;; future -> past
     (SEND 241 1)
     (READ 12)
 
     (SEND 240 2)
     (SEND 12 2)
 
-    ;; '[' ?
+    ;; Is instruction '['?
     (PUSH 12)
     (POP 13)
     (ADD 13 165)
     (IF 13 forward_test_close)
 
-    ;; Nested '['.
+    ;; Nested opening bracket.
     (PUSH 240)
     (IF 240 forward_scan)
 
-    ;; ']' ?
+    ;; Is instruction ']'?
     (LABEL forward_test_close)
     (PUSH 12)
     (POP 13)
     (ADD 13 163)
     (IF 13 forward_scan)
 
-    ;; A ']' at nesting depth zero is the one we want.
+    ;; If nesting counter is empty, this ] matches the original [.
     (EMPTY forward_match)
 
-    ;; Otherwise close one nested pair.
+    ;; Otherwise close one nested level.
     (POP 14)
     (IF 240 forward_scan)
 
@@ -439,59 +416,58 @@
 
 
     ;; ==========================================================
-    ;; Scan backward to matching '['
-    ;;
-    ;; A nested ']' pushes a nesting marker.
-    ;; A nested '[' removes one.
+    ;; Backward bracket scan
     ;; ==========================================================
 
     (LABEL backward_scan)
 
-    ;; No matching '['.
+    ;; Past empty before finding [ => malformed.
     (SEND 242 2)
     (READ 2)
     (IF 2 malformed)
 
-    ;; Move one instruction past -> future.
+    ;; past -> future
     (SEND 241 2)
     (READ 12)
 
     (SEND 240 1)
     (SEND 12 1)
 
-    ;; ']' ?
+    ;; Is instruction ']'?
     (PUSH 12)
     (POP 13)
     (ADD 13 163)
     (IF 13 backward_test_open)
 
-    ;; Nested ']'.
+    ;; Nested closing bracket.
     (PUSH 240)
     (IF 240 backward_scan)
 
-    ;; '[' ?
+    ;; Is instruction '['?
     (LABEL backward_test_open)
     (PUSH 12)
     (POP 13)
     (ADD 13 165)
     (IF 13 backward_scan)
 
-    ;; '[' at nesting depth zero is the target.
+    ;; At depth zero this is the matching '['.
     (EMPTY backward_match)
 
-    ;; Otherwise it matches one nested ']'.
+    ;; Otherwise close one nested level.
     (POP 14)
     (IF 240 backward_scan)
 
     (LABEL backward_match)
 
-    ;; Matching '[' is now on top of program-future.
-    ;; exec_loop will fetch and execute it.
+    ;; Matching '[' is now the top of machine 1.
     (IF 240 exec_loop)
 
 
     ;; ==========================================================
     ;; Termination
+    ;;
+    ;; Since one HALT terminates the whole computation, no shutdown
+    ;; protocol for machines 1–4 is required.
     ;; ==========================================================
 
     (LABEL malformed)
@@ -503,46 +479,39 @@
 
 
   ;; ============================================================
-  ;; MACHINE 1 — generic stack server
+  ;; MACHINE 1 — program future
   ;;
-  ;; Protocol:
+  ;; Generic stack-server protocol:
   ;;
-  ;;   SEND 1        => PUSH; next received integer is the value
-  ;;   SEND 2        => POP; reply to machine 0 with value
-  ;;   SEND 3        => EMPTY; reply 0/1 to machine 0
-  ;;
-  ;; Machine 0 performs operations synchronously, so replies from
-  ;; different servers cannot be confused.
+  ;;   1 VALUE    push VALUE
+  ;;   2          pop; reply to machine 0
+  ;;   3          empty?; reply 0 or 1 to machine 0
   ;; ============================================================
 
   (1
-    ;; a[255] = 1
-    ;; a[254] = 0
     (ADD 255 1)
 
     (LABEL loop)
     (READ 0)
 
-    ;; command == 1?
+    ;; PUSH?
     (ADD 0 255)
     (IF 0 not_push)
 
-    ;; PUSH
     (READ 1)
     (PUSH 1)
     (IF 255 loop)
 
-    ;; command == 2?
+    ;; POP?
     (LABEL not_push)
     (ADD 0 255)
     (IF 0 not_pop)
 
-    ;; POP
     (POP 1)
     (SEND 1 0)
     (IF 255 loop)
 
-    ;; Otherwise command == 3: EMPTY.
+    ;; EMPTY
     (LABEL not_pop)
     (EMPTY is_empty)
 
@@ -558,7 +527,7 @@
 
 
   ;; ============================================================
-  ;; MACHINE 2 — program-past stack
+  ;; MACHINE 2 — program past
   ;; ============================================================
 
   (2
@@ -595,7 +564,7 @@
 
 
   ;; ============================================================
-  ;; MACHINE 3 — cells left of data pointer
+  ;; MACHINE 3 — tape left
   ;; ============================================================
 
   (3
@@ -632,7 +601,7 @@
 
 
   ;; ============================================================
-  ;; MACHINE 4 — cells right of data pointer
+  ;; MACHINE 4 — tape right
   ;; ============================================================
 
   (4

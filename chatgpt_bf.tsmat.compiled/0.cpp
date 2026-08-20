@@ -11,7 +11,7 @@ a[241]%=256;
 a[242]+=3;
 a[242]%=256;
 source_read:
-cout << "0\n"<< flush;
+cout << "2\n"<< flush;
 cin >> a[0];
 if(a[0])goto source_nonzero;
 if(a[240])goto source_done;
@@ -21,57 +21,57 @@ a[1]=s.top();
 s.pop();
 a[1]+=213;
 a[1]%=256;
-if(a[1])goto source_test_1;
+if(a[1])goto source_test_comma;
 if(a[240])goto source_keep;
-source_test_1:
+source_test_comma:
 s.push(a[0]);
 a[1]=s.top();
 s.pop();
 a[1]+=212;
 a[1]%=256;
-if(a[1])goto source_test_2;
+if(a[1])goto source_test_minus;
 if(a[240])goto source_keep;
-source_test_2:
+source_test_minus:
 s.push(a[0]);
 a[1]=s.top();
 s.pop();
 a[1]+=211;
 a[1]%=256;
-if(a[1])goto source_test_3;
+if(a[1])goto source_test_dot;
 if(a[240])goto source_keep;
-source_test_3:
+source_test_dot:
 s.push(a[0]);
 a[1]=s.top();
 s.pop();
 a[1]+=210;
 a[1]%=256;
-if(a[1])goto source_test_4;
+if(a[1])goto source_test_left;
 if(a[240])goto source_keep;
-source_test_4:
+source_test_left:
 s.push(a[0]);
 a[1]=s.top();
 s.pop();
 a[1]+=196;
 a[1]%=256;
-if(a[1])goto source_test_5;
+if(a[1])goto source_test_right;
 if(a[240])goto source_keep;
-source_test_5:
+source_test_right:
 s.push(a[0]);
 a[1]=s.top();
 s.pop();
 a[1]+=194;
 a[1]%=256;
-if(a[1])goto source_test_6;
+if(a[1])goto source_test_open;
 if(a[240])goto source_keep;
-source_test_6:
+source_test_open:
 s.push(a[0]);
 a[1]=s.top();
 s.pop();
 a[1]+=165;
 a[1]%=256;
-if(a[1])goto source_test_7;
+if(a[1])goto source_test_close;
 if(a[240])goto source_keep;
-source_test_7:
+source_test_close:
 s.push(a[0]);
 a[1]=s.top();
 s.pop();
@@ -111,57 +111,57 @@ a[11]=s.top();
 s.pop();
 a[11]+=213;
 a[11]%=256;
-if(a[11])goto op_test_1;
+if(a[11])goto test_comma;
 if(a[240])goto op_plus;
-op_test_1:
+test_comma:
 s.push(a[10]);
 a[11]=s.top();
 s.pop();
 a[11]+=212;
 a[11]%=256;
-if(a[11])goto op_test_2;
+if(a[11])goto test_minus;
 if(a[240])goto op_comma;
-op_test_2:
+test_minus:
 s.push(a[10]);
 a[11]=s.top();
 s.pop();
 a[11]+=211;
 a[11]%=256;
-if(a[11])goto op_test_3;
+if(a[11])goto test_dot;
 if(a[240])goto op_minus;
-op_test_3:
+test_dot:
 s.push(a[10]);
 a[11]=s.top();
 s.pop();
 a[11]+=210;
 a[11]%=256;
-if(a[11])goto op_test_4;
+if(a[11])goto test_left;
 if(a[240])goto op_dot;
-op_test_4:
+test_left:
 s.push(a[10]);
 a[11]=s.top();
 s.pop();
 a[11]+=196;
 a[11]%=256;
-if(a[11])goto op_test_5;
+if(a[11])goto test_right;
 if(a[240])goto op_left;
-op_test_5:
+test_right:
 s.push(a[10]);
 a[11]=s.top();
 s.pop();
 a[11]+=194;
 a[11]%=256;
-if(a[11])goto op_test_6;
+if(a[11])goto test_open;
 if(a[240])goto op_right;
-op_test_6:
+test_open:
 s.push(a[10]);
 a[11]=s.top();
 s.pop();
 a[11]+=165;
 a[11]%=256;
-if(a[11])goto op_test_7;
+if(a[11])goto test_close;
 if(a[240])goto op_open;
-op_test_7:
+test_close:
 s.push(a[10]);
 a[11]=s.top();
 s.pop();
@@ -178,11 +178,12 @@ a[20]+=255;
 a[20]%=256;
 if(a[240])goto advance;
 op_comma:
-cout << "0\n"<< flush;
+cout << "2\n"<< flush;
 cin >> a[20];
 if(a[240])goto advance;
 op_dot:
-cout << "1 " << a[20] << ' ' << -1 << '\n' << flush;
+cout << "3\n"<< flush;
+cin >> a[20];
 if(a[240])goto advance;
 op_left:
 cout << "1 " << a[240] << ' ' << 4 << '\n' << flush;
@@ -190,12 +191,12 @@ cout << "1 " << a[20] << ' ' << 4 << '\n' << flush;
 cout << "1 " << a[242] << ' ' << 3 << '\n' << flush;
 cout << "0\n"<< flush;
 cin >> a[2];
-if(a[2])goto left_zero;
+if(a[2])goto left_new_cell;
 cout << "1 " << a[241] << ' ' << 3 << '\n' << flush;
 cout << "0\n"<< flush;
 cin >> a[20];
 if(a[240])goto advance;
-left_zero:
+left_new_cell:
 s.push(a[250]);
 a[20]=s.top();
 s.pop();
@@ -206,12 +207,12 @@ cout << "1 " << a[20] << ' ' << 3 << '\n' << flush;
 cout << "1 " << a[242] << ' ' << 4 << '\n' << flush;
 cout << "0\n"<< flush;
 cin >> a[2];
-if(a[2])goto right_zero;
+if(a[2])goto right_new_cell;
 cout << "1 " << a[241] << ' ' << 4 << '\n' << flush;
 cout << "0\n"<< flush;
 cin >> a[20];
 if(a[240])goto advance;
-right_zero:
+right_new_cell:
 s.push(a[250]);
 a[20]=s.top();
 s.pop();
@@ -295,9 +296,9 @@ if(a[240])goto backward_scan;
 backward_match:
 if(a[240])goto exec_loop;
 malformed:
-cout << "2\n";
+cout << "4\n";
 return 0;
 program_done:
-cout << "2\n";
+cout << "4\n";
 return 0;
 }
