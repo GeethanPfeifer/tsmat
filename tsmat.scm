@@ -1,5 +1,8 @@
+#!/bin/chicken-csi -s
+
 (import (chicken file))
 (import (chicken process))
+(import (chicken process-context))
 
 (define (instruction->string instruction)
 	(let
@@ -126,9 +129,18 @@
 					"/"
 					(number->string device))))
 		(map car full-description)))
-		
+
 (define (compile full-description name)
 	(create-program full-description name)
 	(call-g++ full-description name))
 	
-
+(let* 
+	(	(infile (car (command-line-arguments)))
+		(name
+			(if (= (length (command-line-arguments)) 2)
+				(cadr (command-line-arguments))
+				(string-append infile ".compiled"))))
+	(compile
+		(call-with-input-file infile
+			(lambda (in) (read in)))
+		name))
