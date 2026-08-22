@@ -31,7 +31,7 @@ The following is a list of all types of statements:
 (PUSH <INT: n>)             ;;; Pushes the contents of register n to the stack.
 (POP <INT: n>)              ;;; Pops the stack, storing in register n.
 
-(LABEL <SYM: s>)            ;;; A label. The symbol should be a only alphabetic characters.
+(LABEL <SYM: s>)            ;;; A label. The symbol should contain only alphabetic characters.
 (IF <INT: n> <SYM: s>)      ;;; If the contents of register n are positive, goto label s. Otherwise, continue.
 (EMPTY <SYM: s>)            ;;; If the stack is empty, goto label s. Otherwise, continue.
 
